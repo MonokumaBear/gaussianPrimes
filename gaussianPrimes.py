@@ -50,8 +50,22 @@ if (coordinateSystem == "cartesian"):
 		a = gaussianPrimes[i][0]
 		b = gaussianPrimes[i][1]
 		image[a + xCenter][b + yCenter][0] = 0
-elif (coordianteSystem == "polar"):
-	exit("Polar coordinate-system is currently unsupported")
+elif (coordinateSystem == "polar"):
+	SCALING_FACTOR = 20
+	# Each point is now a sphere with a radius of 5 pixels to account for polar coordinates needing a higher resolution to be placed accurately
+	w = SCALING_FACTOR * (2 * maxComponentInteger + 1)
+	h = w
+	xCenter = SCALING_FACTOR * maxComponentInteger
+	yCenter = SCALING_FACTOR * maxComponentInteger
+	# Greyscale image
+	image = numpy.full((h, w, 1), 255, numpy.uint8)
+	for i in range(len(gaussianPrimes)):
+		r = gaussianPrimes[i][0]
+		theta = gaussianPrimes[i][1]
+		x = int(round(r * math.cos(theta)))
+		y = int(round(r * math.sin(theta)))
+		# Points are circles instead of pixels
+		cv2.circle(image, (SCALING_FACTOR * x + xCenter, SCALING_FACTOR * y + yCenter), round(SCALING_FACTOR / 4), 0, -1)
 else:
 	exit("Unknown coordinate system; must be either polar or Cartesian")
 
@@ -63,5 +77,5 @@ key = None
 while (key != 0x78):
 	key = cv2.waitKey(0)
 	if (key == 0x73):
-		cv2.imwrite("gaussianPrimes" + str(maxComponentInteger) + ".png", image)
+		cv2.imwrite("gaussianPrimes" + coordinateSystem.capitalize() + str(maxComponentInteger) + ".png", image)
 cv2.destroyAllWindows()
